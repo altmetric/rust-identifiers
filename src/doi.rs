@@ -73,7 +73,9 @@ mod tests {
     fn extract_returns_multiple_dois() {
         let dois = Doi::extract("I love 10.1038/nplants.2015.3 and 10.1038/nplants.2015.4");
 
-        assert_eq!(dois, vec![Doi("10.1038/nplants.2015.3".into()), Doi("10.1038/nplants.2015.4".into())]);
+        assert_eq!(dois,
+                   vec![Doi("10.1038/nplants.2015.3".into()),
+                        Doi("10.1038/nplants.2015.4".into())]);
     }
 
     #[test]
