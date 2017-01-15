@@ -1,6 +1,28 @@
 //! This module handles Digital Object Identifiers (DOIs).
+//!
+//! # Example
+//!
+//! A DOI is represented by the struct `Doi` which implements `FromStr` meaning that they can be
+//! created by calling `parse` on a string slice:
+//!
+//! ```
+//! use identifiers::Doi;
+//!
+//! let doi: Doi = "10.1038/nplants.2015.3".parse().unwrap();
+//! ```
+//!
+//! Alternatively, a string slice can be scanned for zero or more DOIs using `extract`:
+//!
+//! ```
+//! use identifiers::Doi;
+//!
+//! let dois = Doi::extract("I love 10.1234/foo and 10.5678/bar");
+//! ```
 
 use regex::Regex;
+use std::fmt;
+use std::str;
+
 use Error;
 
 /// A single DOI.
@@ -12,22 +34,6 @@ lazy_static! {
 }
 
 impl Doi {
-    /// Try to create a new DOI from a string.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use identifiers::Doi;
-    ///
-    /// let doi = Doi::new("10.1234/foobar");
-    /// ```
-    pub fn new(text: &str) -> Result<Doi, Error> {
-        match DOI_RE.find(text) {
-            Some(mat) => Ok(Doi(mat.as_str().into())),
-            None => Err(Error::InvalidDoi(text.into())),
-        }
-    }
-
     /// Extract valid DOIs from a given string.
     ///
     /// # Example
@@ -42,21 +48,40 @@ impl Doi {
     }
 }
 
+impl str::FromStr for Doi {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match DOI_RE.find(s) {
+            Some(mat) => Ok(Doi(mat.as_str().into())),
+            None => Err(Error::InvalidDoi(s.into())),
+        }
+    }
+}
+
+impl fmt::Display for Doi {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use Error;
     use super::*;
 
     #[test]
-    fn new_returns_a_valid_doi() {
-        let doi = Doi::new("10.1038/nplants.2015.3").unwrap();
+    fn can_parse_a_valid_doi() {
+        let doi: Doi = "10.1038/nplants.2015.3".parse().unwrap();
 
         assert_eq!(doi, Doi("10.1038/nplants.2015.3".into()));
     }
 
     #[test]
-    fn new_returns_an_err_if_given_an_invalid_doi() {
-        match Doi::new("not a DOI") {
+    fn can_parse_an_invalid_doi() {
+        let doi = "not a DOI".parse::<Doi>();
+
+        match doi {
             Err(Error::InvalidDoi(text)) => assert_eq!(text, "not a DOI"),
             _ => panic!("Expected an invalid DOI"),
         }
