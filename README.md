@@ -1,4 +1,4 @@
-# Identifiers
+# Identifiers [![Build Status](https://travis-ci.org/altmetric/rust-identifiers.svg?branch=master)](https://travis-ci.org/altmetric/rust-identifiers)
 
 A work-in-progress Rust library for handling and extracting scholarly identifiers from text.
 
